@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: jawn-parser
+Implementation-Version: 0.8.2
+Specification-Vendor: org.spire-math
+Specification-Title: jawn-parser
+Implementation-Vendor-Id: org.spire-math
+Specification-Version: 0.8.2
+Implementation-URL: http://github.com/non/jawn
+Implementation-Vendor: org.spire-math
+

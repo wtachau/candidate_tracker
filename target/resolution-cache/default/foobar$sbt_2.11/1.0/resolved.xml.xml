@@ -4,7 +4,7 @@
 		module="foobar$sbt_2.11"
 		revision="1.0"
 		status="integration"
-		publication="20151207172935"
+		publication="20151214165331"
 	/>
 	<configurations>
 		<conf name="default" visibility="public"/>
