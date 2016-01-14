@@ -69,6 +69,13 @@ class SaveActor() extends Actor
         trumpId <- candidateRecordService.save(TrumpRecord)
       } yield dayRecordService.save(Set(bernieId.id, clintonId.id, trumpId.id))
 
+      TweetAnalyzer.bernieAverage = 0
+      TweetAnalyzer.bernieTotal = 0
+      TweetAnalyzer.clintonAverage = 0
+      TweetAnalyzer.clintonTotal = 0
+      TweetAnalyzer.trumpAverage = 0
+      TweetAnalyzer.trumpTotal = 0
+
       print("saving...")
     }
   }

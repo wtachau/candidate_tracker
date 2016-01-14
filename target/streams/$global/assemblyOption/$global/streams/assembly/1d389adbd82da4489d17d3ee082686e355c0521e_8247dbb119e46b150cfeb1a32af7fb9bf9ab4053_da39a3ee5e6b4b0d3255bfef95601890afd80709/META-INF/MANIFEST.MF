@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: slick-pg
-Implementation-Version: 0.9.1
-Specification-Vendor: slick-pg
-Specification-Title: slick-pg
-Implementation-Vendor-Id: com.github.tminglei
-Specification-Version: 0.9.1
-Implementation-Vendor: slick-pg
-
