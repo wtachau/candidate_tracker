@@ -76,7 +76,16 @@ trait TweetHttpService extends HttpService{
                         val newTotal = a._1 + b.get.data.total
                         val newAverage: Double = newTotal match {
                           case 0 => 0.0
-                          case i: Int => ((a._2 * a._1 + b.get.data.average) / i)
+                          case i: Int =>
+                            print(s"\n\n$a, $b")
+//                            val one = a._2 * a._1
+//                            val two = b.get.data.total * b.get.data.average
+//                            val three = ((a._2 * a._1 + b.get.data.total * b.get.data.average) / i)
+//                            print(s"\na._2 * a._1 = $one")
+//                            print(s"\nb.get.data.total * b.get.data.average = $two")
+//                            print(s"\n((a._2 * a._1 + b.get.data.total * b.get.data.average) / i) = $three")
+                            ((a._2 * a._1 + b.get.data.total * b.get.data.average) / i)
+
                         }
                         (newTotal, newAverage)
                       })
@@ -89,6 +98,7 @@ trait TweetHttpService extends HttpService{
                     }
 
                     PlayJson.obj(
+
                       s"$day" -> PlayJson.obj(
                         "bernie" -> PlayJson.obj(
                           "total" -> unpacked._1._1,
@@ -111,7 +121,9 @@ trait TweetHttpService extends HttpService{
 
               case Failure(ex) =>
                 complete {
-                  "no"
+                  print(s">> Error getting record")
+                  ex.printStackTrace()
+                  "ruh roh"
                 }
             }
           }
