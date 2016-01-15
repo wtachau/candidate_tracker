@@ -77,6 +77,9 @@ class SaveActor() extends Actor
       TweetAnalyzer.trumpTotal = 0
 
       print("saving...")
+
+      val bernTotal = TweetAnalyzer.bernieTotal
+      println(s"\n (bern's total now: $bernTotal)")
     }
   }
 }
@@ -111,6 +114,7 @@ object Boot extends App
 
     val saveActor = system.actorOf(Props(classOf[SaveActor]), "saveactor")
     system.scheduler.schedule(0 seconds, 3600 seconds, saveActor, "save" )
+//  system.scheduler.schedule(0 seconds, 54 seconds, saveActor, "save" )
 
 
     println("Listening...")

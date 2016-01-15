@@ -71,12 +71,15 @@ object TweetAnalyzer {
 
   def analyzeStatuses(statuses:Array[Status]) = {
 
+    print("\n\n>> analyze status called: \n\n")
+
     val testing = false
 
     var nonNull = true
     var sentimentScores = List.fill(150)(Random.nextDouble():java.lang.Double)
     if (!testing) {
       val result: BatchIndicoResult = indico.sentiment.predict(statuses.map(f => f.getText()))
+      print(s"$result")
       nonNull = (result.getSentiment() != null)
       if (nonNull) {
         sentimentScores = result.getSentiment().asScala.toList
@@ -101,6 +104,10 @@ object TweetAnalyzer {
           latestTweets = latestTweets.updated(Candidate.Bernie, analyzedTweet.status)
         }
       }
+
+      println(s"previous clinton total: $clintonTotal")
+      println(s"previous trump total: $trumpTotal")
+      println(s"previous bernie total: $bernieTotal")
 
       // Calculate new running total/ averages
       val(newClintonTotal, newClintonAverage) = weightedAverage(clintonAverage, clintonTotal, analyzedTweets, Candidate.Clinton)
