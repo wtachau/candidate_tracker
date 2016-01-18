@@ -20,4 +20,4 @@ ADD target/scala-2.11/CandidateTracker-assembly-1.0.jar  /app/server.jar
 ENTRYPOINT [ "java", "-jar", "/app/server.jar" ]
 
 # the server binds to 8080 - expose that port
-EXPOSE 8081
+EXPOSE 8080
