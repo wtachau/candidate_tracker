@@ -1,10 +1,7 @@
 package com.willtachau.candidates
 package api
 
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-
-import akka.actor.ActorSystem
+import com.typesafe.scalalogging.StrictLogging
 
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.server.directives.{RespondWithDirectives, RouteDirectives, PathDirectives, MethodDirectives}
@@ -32,7 +29,8 @@ import play.api.libs.json.{Json => PlayJson, JsObject => PlayJsObject}
 /**
   * Created by williamtachau on 12/14/15.
   */
-trait TweetHttpService extends HttpService{
+trait TweetHttpService extends HttpService
+  with StrictLogging {
 
   val dayRecordService: service.DayRecord
   val candidateRecordService: service.CandidateRecord
@@ -77,7 +75,7 @@ trait TweetHttpService extends HttpService{
                         val newAverage: Double = newTotal match {
                           case 0 => 0.0
                           case i: Int =>
-                            print(s"\n\n$a, $b")
+                            logger.info(s"\n\n$a, $b")
 //                            val one = a._2 * a._1
 //                            val two = b.get.data.total * b.get.data.average
 //                            val three = ((a._2 * a._1 + b.get.data.total * b.get.data.average) / i)

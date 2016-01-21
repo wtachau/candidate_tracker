@@ -24,8 +24,8 @@ libraryDependencies ++= {
     "com.propensive" %% "rapture-json-jawn" % "2.0.0-M1",
     "com.github.tminglei" %% "slick-pg" % "0.9.1",
     "io.indico" % "indico" % "3.1.0",
-    "com.typesafe.play" %% "play-json" % "2.3.4"
-
+    "com.typesafe.play" %% "play-json" % "2.3.4",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
   )
 }
 
@@ -34,5 +34,3 @@ resolvers ++= Seq(
   "Spray repository" at "http://repo.spray.io",
   "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 )
-
-//addSbtPlugin("play" % "sbt-plugin" % "2.1.0")

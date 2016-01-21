@@ -17,12 +17,4 @@ object DayRecord {
       candidateRecords = records
     )
   }
-
-//  def publicJsonSummary(dayRecord: WithId[model.DayRecord]): Json = {
-//    Json(Map(
-//      "id" -> Json(dayRecord.id.value),
-//      "date" -> Json(dayRecord.date),
-//      "candidates" -> Json(dayRecord.candidateRecords)
-//    ))
-//  }
 }

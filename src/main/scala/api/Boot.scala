@@ -29,10 +29,6 @@ class ApplicationActor() extends Actor
   with TweetHttpService
   with RealEnv {
 
-//  def scheduler = context.system.scheduler
-//
-//  def versionConfig = candidatesConfig.getConfig("version")
-
   def actorRefFactory = context
 
   def receive = runRoute(
@@ -132,8 +128,4 @@ object Boot extends App
 
     val keywords: List[String] = List(Candidate.clintonKeywords, Candidate.trumpKeywords, Candidate.bernieKeywords).flatten
     twitterStreamer.filter(new FilterQuery(keywords: _*))
-
-//    Thread.sleep(200000)
-//    twitterStreamer.cleanUp()
-//    twitterStreamer.shutdown()
 }
