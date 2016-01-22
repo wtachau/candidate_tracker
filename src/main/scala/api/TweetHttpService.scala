@@ -45,6 +45,32 @@ trait TweetHttpService extends HttpService
             }
           }
         } ~
+        path("recentTweets") {
+          parameters("candidate") { candidate =>
+            get {
+              complete {
+                candidate match {
+                  case "bernie" =>
+                    Map(
+                      "id" -> s"${RecentStatusRecorder.recentBernieStatus.getId}",
+                      "user" -> RecentStatusRecorder.recentBernieStatus.getUser.getScreenName
+                    ).toJson.toString
+                  case "clinton" =>
+                    Map(
+                      "id" -> s"${RecentStatusRecorder.recentClintonStatus.getId}",
+                      "user" -> RecentStatusRecorder.recentClintonStatus.getUser.getScreenName
+                    ).toJson.toString
+                  case "trump" =>
+                    Map(
+                      "id" -> s"${RecentStatusRecorder.recentTrumpStatus.getId}",
+                      "user" -> RecentStatusRecorder.recentTrumpStatus.getUser.getScreenName
+                    ).toJson.toString
+                  case _ => "candidate not found"
+                }
+              }
+            }
+          }
+        } ~
         path("pastTweets") {
           get {
             onComplete(dayRecordService.getAllRecords()) {

@@ -64,7 +64,6 @@ object TweetAnalyzer {
     val recentTotal = candidateTweets.length
     val recentAverage = if (recentTotal > 0 ) candidateTweets.map{tweet => tweet.sentimentScore}.sum / recentTotal else 0
     val newTotal = recentTotal + currentTotal
-//    println(s"Candidate: $theCandidate, currentTotal: $currentTotal, recentTotal: $recentTotal, recentAverage: $recentAverage")
     val average = if (newTotal > 0) (currentTotal * currentAverage + recentTotal * recentAverage) / newTotal else 0
     return (newTotal, average)
   }

@@ -21,8 +21,20 @@ class TwitterStatusListener() extends StatusListener
   override def onStallWarning(warning: StallWarning): Unit =
     logger.info("onStallWarning: "+warning.toString())
 
-  override def onStatus(status: Status): Unit =
+  override def onStatus(status: Status): Unit = {
+
     RecentStatusRecorder.recentStatus = status
+
+    val candidate = TweetAnalyzer.typeOfCandidate(status)
+    if (!candidate.isEmpty) {
+      candidate.head match {
+        case Candidate.Bernie => RecentStatusRecorder.recentBernieStatus = status
+        case Candidate.Clinton => RecentStatusRecorder.recentClintonStatus = status
+        case Candidate.Trump => RecentStatusRecorder.recentTrumpStatus = status
+        case _ => "no candidate found in tweet"
+      }
+    }
+  }
 
   override def onTrackLimitationNotice(numberOfLimitedStatuses: Int): Unit =
     logger.info("TrackLimitationNotice: "+numberOfLimitedStatuses.toString())
@@ -34,8 +46,13 @@ class TwitterStatusListener() extends StatusListener
 object RecentStatusRecorder {
   var recentStatus: Status = _
 
+  var recentBernieStatus: Status = _
+  var recentClintonStatus: Status = _
+  var recentTrumpStatus: Status = _
+
   def analyzeLatestStatus() = {
     val statusToAnalyze = recentStatus
+
     println("analyzing status:")
     if (statusToAnalyze != null) {
       println(statusToAnalyze.getText())
