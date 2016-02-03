@@ -11,6 +11,7 @@ import com.willtachau.candidates.model.core.WithId
 import com.willtachau.candidates.model.{CandidateRecord, DayRecord}
 import spray.http.HttpHeaders.RawHeader
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, Future}
 
 //import spray.http.HttpHeaders.RawHeader
@@ -65,6 +66,16 @@ trait TweetHttpService extends HttpService
                       "id" -> s"${RecentStatusRecorder.recentTrumpStatus.getId}",
                       "user" -> RecentStatusRecorder.recentTrumpStatus.getUser.getScreenName
                     ).toJson.toString
+                  case "cruz" =>
+                    Map(
+                      "id" -> s"${RecentStatusRecorder.recentCruzStatus.getId}",
+                      "user" -> RecentStatusRecorder.recentCruzStatus.getUser.getScreenName
+                    ).toJson.toString
+                  case "rubio" =>
+                    Map(
+                      "id" -> s"${RecentStatusRecorder.recentRubioStatus.getId}",
+                      "user" -> RecentStatusRecorder.recentRubioStatus.getUser.getScreenName
+                    ).toJson.toString
                   case _ => "candidate not found"
                 }
               }
@@ -90,51 +101,74 @@ trait TweetHttpService extends HttpService
                     }
                     val futureDayRecords: Future[Seq[Set[Option[WithId[model.CandidateRecord]]]]] = Future.sequence(futureCandidateRecords)
 
-                    // Define how we get to the tuple from our CandidateRecord Set
-                    def asTriple(aSet:Set[Option[WithId[model.CandidateRecord]]]): Tuple3[Option[WithId[model.CandidateRecord]], Option[WithId[model.CandidateRecord]], Option[WithId[model.CandidateRecord]]] = {
-                      return (aSet.head, aSet.tail.head, aSet.last)
-                    }
                     // Split up
-                    def unpackTotalAndAverage(list:List[Option[WithId[model.CandidateRecord]]]): Tuple2[Int, Double] = {
+                    def unpackTotalAndAverage(list:List[WithId[model.CandidateRecord]]): Tuple2[Int, Double] = {
                       list.foldLeft((0,0.0))((a:Tuple2[Int, Double], b) => {
-                        val newTotal = a._1 + b.get.data.total
+                        val newTotal = a._1 + b.data.total
                         val newAverage: Double = newTotal match {
                           case 0 => 0.0
                           case i: Int =>
                             logger.info(s"\n\n$a, $b")
-//                            val one = a._2 * a._1
-//                            val two = b.get.data.total * b.get.data.average
-//                            val three = ((a._2 * a._1 + b.get.data.total * b.get.data.average) / i)
-//                            print(s"\na._2 * a._1 = $one")
-//                            print(s"\nb.get.data.total * b.get.data.average = $two")
-//                            print(s"\n((a._2 * a._1 + b.get.data.total * b.get.data.average) / i) = $three")
-                            ((a._2 * a._1 + b.get.data.total * b.get.data.average) / i)
+                            ((a._2 * a._1 + b.data.total * b.data.average) / i)
 
                         }
                         (newTotal, newAverage)
                       })
                     }
 
-                    val result = Await.result(futureDayRecords, 20 seconds).toList.unzip3(asTriple)
-                    val unpacked = result match {
-                      case (bernieList, clintonList, trumpList) =>
-                        (unpackTotalAndAverage(bernieList), unpackTotalAndAverage(clintonList), unpackTotalAndAverage(trumpList))
+                    var bernieRecords = new ListBuffer[WithId[model.CandidateRecord]]
+                    var trumpRecords = new ListBuffer[WithId[model.CandidateRecord]]
+                    var clintonRecords= new ListBuffer[WithId[model.CandidateRecord]]
+                    var cruzRecords = new ListBuffer[WithId[model.CandidateRecord]]
+                    var rubioRecords = new ListBuffer[WithId[model.CandidateRecord]]
+
+                    Await.result(futureDayRecords, 20 seconds).toList.map { set =>
+                      set map { recordOption =>
+                        recordOption map { record =>
+                          record.data.candidate match {
+                            case Candidate.Bernie =>
+                              bernieRecords += record
+                            case Candidate.Trump =>
+                              trumpRecords += record
+                            case Candidate.Clinton =>
+                              clintonRecords += record
+                            case Candidate.Cruz =>
+                              cruzRecords += record
+                            case Candidate.Rubio =>
+                              rubioRecords += record
+                          }
+                        }
+                      }
                     }
+
+                    val (bernieTotal, bernieAverage) = unpackTotalAndAverage(bernieRecords.toList)
+                    val (trumpTotal, trumpAverage) = unpackTotalAndAverage(trumpRecords.toList)
+                    val (clintonTotal, clintonAverage) = unpackTotalAndAverage(clintonRecords.toList)
+                    val (cruzTotal, cruzAverage) = unpackTotalAndAverage(cruzRecords.toList)
+                    val (rubioTotal, rubioAverage) = unpackTotalAndAverage(rubioRecords.toList)
 
                     PlayJson.obj(
 
                       s"$day" -> PlayJson.obj(
                         "bernie" -> PlayJson.obj(
-                          "total" -> unpacked._1._1,
-                          "average" -> unpacked._1._2
+                          "total" -> bernieTotal,
+                          "average" -> bernieAverage
                         ),
                         "clinton" -> PlayJson.obj(
-                          "total" -> unpacked._2._1,
-                          "average" -> unpacked._2._2
+                          "total" -> clintonTotal,
+                          "average" -> clintonAverage
                         ),
                         "trump" -> PlayJson.obj(
-                          "total" -> unpacked._3._1,
-                          "average" -> unpacked._3._2
+                          "total" -> trumpTotal,
+                          "average" -> trumpAverage
+                        ),
+                        "cruz" -> PlayJson.obj(
+                          "total" -> cruzTotal,
+                          "average" -> cruzAverage
+                        ),
+                        "rubio" -> PlayJson.obj(
+                          "total" -> rubioTotal,
+                          "average" -> rubioAverage
                         )
                       )
                     )
@@ -160,17 +194,23 @@ trait TweetHttpService extends HttpService
       "test" -> 3,
       "clinton" -> Map(
         "average" -> TweetAnalyzer.clintonAverage,
-        "total" -> TweetAnalyzer.clintonTotal,
-        "date" -> "8-Apr-12"
+        "total" -> TweetAnalyzer.clintonTotal
       ),
       "trump" -> Map(
         "average" -> TweetAnalyzer.trumpAverage,
-        "total" -> TweetAnalyzer.trumpTotal,
-        "date" -> "8-Apr-12"
+        "total" -> TweetAnalyzer.trumpTotal
       ),
       "bernie" -> Map(
         "average" -> TweetAnalyzer.bernieAverage,
-        "total" -> TweetAnalyzer.bernieTotal,
-        "date" -> "8-Apr-12"
-      )).toJson.toString()
+        "total" -> TweetAnalyzer.bernieTotal
+      ),
+      "cruz" -> Map(
+        "average" -> TweetAnalyzer.cruzAverage,
+        "total" -> TweetAnalyzer.cruzTotal
+      ),
+      "rubio" -> Map(
+       "average" -> TweetAnalyzer.rubioAverage,
+        "total" -> TweetAnalyzer.rubioTotal
+      )
+  ).toJson.toString()
 }

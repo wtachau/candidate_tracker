@@ -25,12 +25,14 @@ libraryDependencies ++= {
     "com.github.tminglei" %% "slick-pg" % "0.9.1",
     "io.indico" % "indico" % "3.1.0",
     "com.typesafe.play" %% "play-json" % "2.3.4",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+    "org.flywaydb" %  "flyway-core"  % "3.2.1"
   )
 }
 
 resolvers ++= Seq(
   "hseeberger at bintray" at "http://dl.bintray.com/hseeberger/maven",
   "Spray repository" at "http://repo.spray.io",
-  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
+  "Flyway" at "http://flywaydb.org/repo"
 )

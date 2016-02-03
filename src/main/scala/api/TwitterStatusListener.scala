@@ -31,6 +31,8 @@ class TwitterStatusListener() extends StatusListener
         case Candidate.Bernie => RecentStatusRecorder.recentBernieStatus = status
         case Candidate.Clinton => RecentStatusRecorder.recentClintonStatus = status
         case Candidate.Trump => RecentStatusRecorder.recentTrumpStatus = status
+        case Candidate.Cruz => RecentStatusRecorder.recentCruzStatus = status
+        case Candidate.Rubio => RecentStatusRecorder.recentRubioStatus = status
         case _ => "no candidate found in tweet"
       }
     }
@@ -49,6 +51,8 @@ object RecentStatusRecorder {
   var recentBernieStatus: Status = _
   var recentClintonStatus: Status = _
   var recentTrumpStatus: Status = _
+  var recentCruzStatus: Status = _
+  var recentRubioStatus: Status = _
 
   def analyzeLatestStatus() = {
     val statusToAnalyze = recentStatus

@@ -4,7 +4,7 @@ package api
 import akka.io.{IO, Tcp}
 import akka.stream.ActorMaterializer
 import com.willtachau.candidates.model.CandidateRecord
-import com.willtachau.candidates.util.{DatabaseProvider, DBUtils}
+import com.willtachau.candidates.util.{Migration, DatabaseProvider, DBUtils}
 import spray.can.Http
 import twitter4j.{FilterQuery, TwitterStreamFactory}
 import twitter4j.conf.ConfigurationBuilder
@@ -19,10 +19,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object Candidate extends Enumeration {
   type Candidate = Value
-  val Trump, Clinton, Bernie = Value
+  val Trump, Clinton, Bernie, Cruz, Rubio = Value
   val clintonKeywords = List("Clinton")
   val trumpKeywords = List("Trump")
   val bernieKeywords = List("Bernie", "FeelTheBern", "Sanders")
+  val cruzKeywords = List("cruz")
+  val rubioKeywords = List("marco", "rubio")
 }
 
 class ApplicationActor() extends Actor
@@ -58,19 +60,31 @@ class SaveActor() extends Actor
       val BernieRecord = CandidateRecord(Candidate.Bernie, TweetAnalyzer.bernieAverage, TweetAnalyzer.bernieTotal)
       val ClintonRecord = CandidateRecord(Candidate.Clinton, TweetAnalyzer.clintonAverage, TweetAnalyzer.clintonTotal)
       val TrumpRecord = CandidateRecord(Candidate.Trump, TweetAnalyzer.trumpAverage, TweetAnalyzer.trumpTotal)
+      val CruzRecord = CandidateRecord(Candidate.Cruz, TweetAnalyzer.cruzAverage, TweetAnalyzer.cruzTotal)
+      val RubioRecord = CandidateRecord(Candidate.Rubio, TweetAnalyzer.rubioAverage, TweetAnalyzer.rubioTotal)
 
       for {
         bernieId <- candidateRecordService.save(BernieRecord)
         clintonId <- candidateRecordService.save(ClintonRecord)
         trumpId <- candidateRecordService.save(TrumpRecord)
-      } yield dayRecordService.save(Set(bernieId.id, clintonId.id, trumpId.id))
+        cruzId <- candidateRecordService.save(CruzRecord)
+        rubioId <- candidateRecordService.save(RubioRecord)
+      } yield dayRecordService.save(Set(bernieId.id, clintonId.id, trumpId.id, cruzId.id, rubioId.id))
 
       TweetAnalyzer.bernieAverage = 0
       TweetAnalyzer.bernieTotal = 0
+
       TweetAnalyzer.clintonAverage = 0
       TweetAnalyzer.clintonTotal = 0
+
       TweetAnalyzer.trumpAverage = 0
       TweetAnalyzer.trumpTotal = 0
+
+      TweetAnalyzer.cruzAverage = 0
+      TweetAnalyzer.cruzTotal = 0
+
+      TweetAnalyzer.rubioAverage = 0
+      TweetAnalyzer.rubioTotal = 0
 
       print("saving...")
 
@@ -86,9 +100,11 @@ object Boot extends App
   with util.CandidatesConfig
   with util.RootConfig
   with util.DatabaseProvider
-
+  with Migration
   with SimpleRoutingApp {
     new DBUtils().appDBSetup()
+
+//    migrate()
 
     implicit val system: ActorSystem = ActorSystem("presidents")
     implicit val materializer = ActorMaterializer()(system)
@@ -106,7 +122,7 @@ object Boot extends App
     }(system.dispatcher)
 
     // Every 52 seconds is about 50,000 times a month
-    system.scheduler.schedule(0 seconds, 52 seconds)(RecentStatusRecorder.analyzeLatestStatus)
+    system.scheduler.schedule(0 seconds, 31 seconds)(RecentStatusRecorder.analyzeLatestStatus)
 
     val saveActor = system.actorOf(Props(classOf[SaveActor]), "saveactor")
     system.scheduler.schedule(0 seconds, 3600 seconds, saveActor, "save" )
@@ -126,6 +142,11 @@ object Boot extends App
     val statusListener = new TwitterStatusListener()
     twitterStreamer.addListener(statusListener)
 
-    val keywords: List[String] = List(Candidate.clintonKeywords, Candidate.trumpKeywords, Candidate.bernieKeywords).flatten
+    val keywords: List[String] = List(
+      Candidate.clintonKeywords,
+      Candidate.trumpKeywords,
+      Candidate.bernieKeywords,
+      Candidate.cruzKeywords,
+      Candidate.rubioKeywords).flatten
     twitterStreamer.filter(new FilterQuery(keywords: _*))
 }

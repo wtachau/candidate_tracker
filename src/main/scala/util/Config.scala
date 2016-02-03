@@ -12,3 +12,12 @@ trait CandidatesConfig {
 
   lazy val candidatesConfig: Config = rootConfig.getConfig("candidates")
 }
+
+trait DatabaseConfig {
+  self: RootConfig =>
+
+  lazy val databaseUrl = rootConfig.getString("candidates.db.baseUrl")
+  lazy val databaseUser = rootConfig.getString("candidates.db.user")
+  lazy val databasePassword = rootConfig.getString("candidates.db.password")
+
+}
