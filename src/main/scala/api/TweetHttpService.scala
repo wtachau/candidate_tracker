@@ -82,7 +82,7 @@ trait TweetHttpService extends HttpService
             }
           }
         } ~
-        path("pastTweets") {
+        path("pastTweets.json") {
           get {
             onComplete(dayRecordService.getAllRecords()) {
               case Success(records) =>
